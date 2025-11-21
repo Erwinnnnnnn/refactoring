@@ -16,7 +16,6 @@ public class StatementPrinter {
     private final Invoice invoice;
     private final Map<String, Play> plays;
 
-
     /**
      * Constructs a StatementPrinter for a given invoice and play mapping.
      *
@@ -97,6 +96,7 @@ public class StatementPrinter {
     /**
      * Returns the amount for a single performance.
      * @return total amount in cents
+     * @throws RuntimeException if a play type is unknown
      */
     public int getAmount() {
         int totalAmount = 0;
@@ -127,6 +127,7 @@ public class StatementPrinter {
         }
         return totalAmount;
     }
+
     /**
      * Returns the amount for a single performance.
      * @param performance the performance to calculate
@@ -210,10 +211,10 @@ public class StatementPrinter {
         return frmt.format(amountInCents / Constants.PERCENT_FACTOR);
     }
 
-
     /**
      * Returns the total amount.
      * @return total amount in cents
+     * @throws RuntimeException if a play type is unknown
      */
     public int getTotalAmount() {
         int totalAmount = 0;
