@@ -112,4 +112,64 @@ public class StatementPrinter {
         return totalAmount;
     }
 
+    public Play getPlay(Performance p) {
+        return plays.get(p.getPlayID());
+    }
+
+    public int getVolumeCredits() {
+        int volumeCredits = 0;
+        for (final Performance p : invoice.getPerformances()) {
+            final Play play = plays.get(p.getPlayID());
+            // base credits
+            volumeCredits += Math.max(p.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
+            // extra credits for comedies
+            if ("comedy".equals(play.getType())) {
+                volumeCredits += p.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
+            }
+        }
+        return volumeCredits;
+    }
+
+    public String usd(int amountInCents) {
+        final NumberFormat frmt = NumberFormat.getCurrencyInstance(Locale.US);
+        return frmt.format(amountInCents / 100.0);
+    }
+
+    public int getTotalAmount() {
+        int totalAmount = 0;
+        for (final Performance p : invoice.getPerformances()) {
+            final Play play = plays.get(p.getPlayID());
+            int thisAmount = 0;
+            switch (play.getType()) {
+                case "tragedy":
+                    thisAmount = Constants.TRAGEDY_BASE_AMOUNT;
+                    if (p.getAudience() > Constants.TRAGEDY_AUDIENCE_THRESHOLD) {
+                        thisAmount += Constants.TRAGEDY_OVER_BASE_CAPACITY_PER_PERSON
+                                * (p.getAudience() - Constants.TRAGEDY_AUDIENCE_THRESHOLD);
+                    }
+                    break;
+                case "comedy":
+                    thisAmount = Constants.COMEDY_BASE_AMOUNT;
+                    if (p.getAudience() > Constants.COMEDY_AUDIENCE_THRESHOLD) {
+                        thisAmount += Constants.COMEDY_OVER_BASE_CAPACITY_AMOUNT
+                                + Constants.COMEDY_OVER_BASE_CAPACITY_PER_PERSON
+                                * (p.getAudience() - Constants.COMEDY_AUDIENCE_THRESHOLD);
+                    }
+                    thisAmount += Constants.COMEDY_AMOUNT_PER_AUDIENCE * p.getAudience();
+                    break;
+                default:
+                    throw new RuntimeException("unknown type: " + play.getType());
+            }
+            totalAmount += thisAmount;
+        }
+        return totalAmount;
+    }
+
+    public int getTotalVolumeCredits() {
+        int totalCredits = 0;
+        for (final Performance p : invoice.getPerformances()) {
+            totalCredits += getVolumeCredits(p);
+        }
+        return totalCredits;
+    }
 }
