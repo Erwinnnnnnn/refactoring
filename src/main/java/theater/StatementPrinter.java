@@ -4,6 +4,8 @@ import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Map;
 
+import static theater.Constants.PERCENT_FACTOR;
+
 /**
  * This class generates a statement for a given invoice of performances.
  */
@@ -67,13 +69,13 @@ public class StatementPrinter {
 
             // print line for this order
             result.append(String.format("  %s: %s (%s seats)%n",
-                    play.getName(), frmt.format(thisAmount / 100), p.getAudience()));
+                    play.getName(), frmt.format(thisAmount / PERCENT_FACTOR), p.getAudience()));
             totalAmount += thisAmount;
         }
 
         result.append(String.format(
                 "Amount owed is %s%n",
-                frmt.format(totalAmount / Constants.PERCENT_FACTOR)));
+                frmt.format(totalAmount / PERCENT_FACTOR)));
 
         result.append(String.format(
                 "You earned %s credits%n",
