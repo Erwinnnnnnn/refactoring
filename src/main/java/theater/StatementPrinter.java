@@ -121,41 +121,6 @@ public class StatementPrinter {
     }
 
     /**
-     * Returns the play ID.
-     */
-
-    public Play getPlay(Performance performance) {
-        return plays.get(performance.getPlayID());
-    }
-
-    /**
-     * Returns volumeCredits.
-     */
-
-    public int getVolumeCredits() {
-        int volumeCredits = 0;
-        for (final Performance performance : invoice.getPerformances()) {
-            final Play play = plays.get(performance.getPlayID());
-            // base credits
-            volumeCredits += Math.max(performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
-            // extra credits for comedies
-            if (COMEDY.equals(play.getType())) {
-                volumeCredits += performance.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
-            }
-        }
-        return volumeCredits;
-    }
-
-    /**
-     * Returns the amount in dollars.
-     */
-
-    public String usd(int amountInCents) {
-        final NumberFormat frmt = NumberFormat.getCurrencyInstance(Locale.US);
-        return frmt.format(amountInCents / 100.0);
-    }
-
-    /**
      * Returns the amount for a single performance.
      */
 
@@ -217,6 +182,41 @@ public class StatementPrinter {
             totalAmount += thisAmount;
         }
         return totalAmount;
+    }
+
+    /**
+     * Returns the play ID.
+     */
+
+    public Play getPlay(Performance performance) {
+        return plays.get(performance.getPlayID());
+    }
+
+    /**
+     * Returns volumeCredits.
+     */
+
+    public int getVolumeCredits() {
+        int volumeCredits = 0;
+        for (final Performance performance : invoice.getPerformances()) {
+            final Play play = plays.get(performance.getPlayID());
+            // base credits
+            volumeCredits += Math.max(performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
+            // extra credits for comedies
+            if (COMEDY.equals(play.getType())) {
+                volumeCredits += performance.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
+            }
+        }
+        return volumeCredits;
+    }
+
+    /**
+     * Returns the amount in dollars.
+     */
+
+    public String usd(int amountInCents) {
+        final NumberFormat frmt = NumberFormat.getCurrencyInstance(Locale.US);
+        return frmt.format(amountInCents / Constants.PERCENT_FACTOR);
     }
 
     /**
