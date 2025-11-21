@@ -9,12 +9,20 @@ import java.util.Map;
  */
 
 public class StatementPrinter {
-    private final Invoice invoice;
-    private final Map<String, Play> plays;
     private static final String TRAGEDY = "tragedy";
     private static final String COMEDY = "comedy";
     private static final String UNKNOWN_TYPE_MSG = "unknown type: ";
 
+    private final Invoice invoice;
+    private final Map<String, Play> plays;
+
+
+    /**
+     * Constructs a StatementPrinter for a given invoice and play mapping.
+     *
+     * @param invoice the invoice containing performances
+     * @param plays   the map of playID to Play objects
+     */
     public StatementPrinter(Invoice invoice, Map<String, Play> plays) {
         this.invoice = invoice;
         this.plays = plays;
@@ -88,8 +96,8 @@ public class StatementPrinter {
 
     /**
      * Returns the amount for a single performance.
+     * @return total amount in cents
      */
-
     public int getAmount() {
         int totalAmount = 0;
         for (final Performance performance : invoice.getPerformances()) {
@@ -119,11 +127,12 @@ public class StatementPrinter {
         }
         return totalAmount;
     }
-
     /**
      * Returns the amount for a single performance.
+     * @param performance the performance to calculate
+     * @return the amount for this performance in cents
+     * @throws RuntimeException if the play type is unknown
      */
-
     public int getAmount(Performance performance) {
         final Play play = plays.get(performance.getPlayID());
         int thisAmount = 0;
@@ -151,9 +160,61 @@ public class StatementPrinter {
     }
 
     /**
-     * Returns the total amount.
+     * Returns the play ID.
+     * @param performance the performance to query
+     * @return the Play object
      */
+    public Play getPlay(Performance performance) {
+        return plays.get(performance.getPlayID());
+    }
 
+    /**
+     * Returns volumeCredits.
+     * @return total volume credits
+     */
+    public int getVolumeCredits() {
+        int volumeCredits = 0;
+        for (final Performance performance : invoice.getPerformances()) {
+            final Play play = plays.get(performance.getPlayID());
+            // base credits
+            volumeCredits += Math.max(performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
+            // extra credits for comedies
+            if (COMEDY.equals(play.getType())) {
+                volumeCredits += performance.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
+            }
+        }
+        return volumeCredits;
+    }
+
+    /**
+     * Returns the credits.
+     * @param performance the performance to calculate
+     * @return volume credits for this performance
+     */
+    public int getVolumeCredits(Performance performance) {
+        final Play play = plays.get(performance.getPlayID());
+        int credits = Math.max(performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
+        if (COMEDY.equals(play.getType())) {
+            credits += performance.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
+        }
+        return credits;
+    }
+
+    /**
+     * Returns the amount in dollars.
+     * @param amountInCents amount in cents
+     * @return formatted USD string
+     */
+    public String usd(int amountInCents) {
+        final NumberFormat frmt = NumberFormat.getCurrencyInstance(Locale.US);
+        return frmt.format(amountInCents / Constants.PERCENT_FACTOR);
+    }
+
+
+    /**
+     * Returns the total amount.
+     * @return total amount in cents
+     */
     public int getTotalAmount() {
         int totalAmount = 0;
         for (final Performance performance : invoice.getPerformances()) {
@@ -185,57 +246,9 @@ public class StatementPrinter {
     }
 
     /**
-     * Returns the play ID.
-     */
-
-    public Play getPlay(Performance performance) {
-        return plays.get(performance.getPlayID());
-    }
-
-    /**
-     * Returns volumeCredits.
-     */
-
-    public int getVolumeCredits() {
-        int volumeCredits = 0;
-        for (final Performance performance : invoice.getPerformances()) {
-            final Play play = plays.get(performance.getPlayID());
-            // base credits
-            volumeCredits += Math.max(performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
-            // extra credits for comedies
-            if (COMEDY.equals(play.getType())) {
-                volumeCredits += performance.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
-            }
-        }
-        return volumeCredits;
-    }
-
-    /**
-     * Returns the amount in dollars.
-     */
-
-    public String usd(int amountInCents) {
-        final NumberFormat frmt = NumberFormat.getCurrencyInstance(Locale.US);
-        return frmt.format(amountInCents / Constants.PERCENT_FACTOR);
-    }
-
-    /**
-     * Returns the credits.
-     */
-
-    public int getVolumeCredits(Performance performance) {
-        final Play play = plays.get(performance.getPlayID());
-        int credits = Math.max(performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
-        if (COMEDY.equals(play.getType())) {
-            credits += performance.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
-        }
-        return credits;
-    }
-
-    /**
      * Returns the total credits.
+     * @return total volume credits
      */
-
     public int getTotalVolumeCredits() {
         int totalCredits = 0;
         for (final Performance performance : invoice.getPerformances()) {
